@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bc_risk_db
+    environment:
+      POSTGRES_DB: bc_risk
+      POSTGRES_USER: bc_risk_user
+      POSTGRES_PASSWORD: bc_risk_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./database/schema_init.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    restart: unless-stopped
