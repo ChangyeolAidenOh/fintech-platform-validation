@@ -344,7 +344,7 @@ def tab_shap():
     )
 
     # Display SHAP figures if available
-    def fit_to_canvas(img, width=700, height=700):
+    def fit_to_canvas(img, width=700, height=750):
         from PIL import Image as PILImage
         canvas = PILImage.new("RGB", (width, height), "white")
         ratio = min(width / img.width, height / img.height)
