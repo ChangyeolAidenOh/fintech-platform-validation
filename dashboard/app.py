@@ -349,12 +349,12 @@ def tab_shap():
     with col1:
         img = load_figure("model_02_shap_summary.png")
         if img:
-            img_resized = img.resize((800, 600))
+            img_resized = img.resize((600, 500))
             st.image(img_resized, caption="SHAP Summary (원본 타겟)", use_container_width=True)
     with col2:
         img = load_figure("model_12_normalized_shap.png")
         if img:
-            img_resized = img.resize((800, 600))
+            img_resized = img.resize((600, 500))
             st.image(img_resized, caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
 
