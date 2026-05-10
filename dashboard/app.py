@@ -395,20 +395,28 @@ def tab_shap():
     # SHAP summary plots
     st.markdown("---")
 
-    def resize_to_height(img, target_height=560):
-        ratio = target_height / img.height
-        new_width = int(img.width * ratio)
-        return img.resize((new_width, target_height))
+    # Display SHAP figures if available
+    def fit_to_canvas(img, width=700, height=650):
+        from PIL import Image as PILImage
+        canvas = PILImage.new("RGB", (width, height), "white")
+        ratio = min(width / img.width, height / img.height)
+        new_w = int(img.width * ratio)
+        new_h = int(img.height * ratio)
+        resized = img.resize((new_w, new_h))
+        x = (width - new_w) // 2
+        y = (height - new_h) // 2
+        canvas.paste(resized, (x, y))
+        return canvas
 
     col1, col2 = st.columns(2)
     with col1:
         img = load_figure("model_02_shap_summary.png")
         if img:
-            st.image(resize_to_height(img), caption="SHAP Summary (원본 타겟)", use_container_width=True)
+            st.image(fit_to_canvas(img), caption="SHAP Summary (원본 타겟)", use_container_width=True)
     with col2:
         img = load_figure("model_12_normalized_shap.png")
         if img:
-            st.image(resize_to_height(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
+            st.image(fit_to_canvas(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
     business_takeaway(
         "외부데이터는 카드 데이터의 보강재라기보다, "
