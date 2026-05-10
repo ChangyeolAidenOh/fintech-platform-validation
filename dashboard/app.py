@@ -1,15 +1,5 @@
 """
-Fintech Platform Validation — Streamlit Dashboard
-
-Tabs:
-  1. Project Motivation (ABP Gap Analysis)
-  2. Ablation Study Results
-  3. Industry Risk Analysis
-  4. SHAP & Feature Redundancy
-  5. Temporal Trend
-  6. Insights & Proposals
-
-Usage: streamlit run dashboard/app.py
+Fintech Platform Validation — Streamlit Dashboard v2
 """
 
 import os
@@ -31,9 +21,6 @@ DATA_DIR = "data/exports"
 FIG_DIR = "figures"
 
 
-# ================================================================
-# Data Loading
-# ================================================================
 @st.cache_data
 def load_csv(filename):
     path = os.path.join(DATA_DIR, filename)
@@ -49,6 +36,15 @@ def load_figure(filename):
     return None
 
 
+def business_takeaway(text):
+    st.markdown(f"""
+    <div style="background-color: #f0f2f6; border-left: 4px solid #4682B4;
+                padding: 12px 16px; margin-top: 20px; border-radius: 4px;">
+        <strong>Business Takeaway:</strong> {text}
+    </div>
+    """, unsafe_allow_html=True)
+
+
 # ================================================================
 # Sidebar
 # ================================================================
@@ -58,8 +54,8 @@ def render_sidebar():
 
     st.sidebar.markdown("### About")
     st.sidebar.markdown(
-        "금융 빅데이터 플랫폼의 자체 인정 한계를 "
-        "공공데이터로 실증 검증한 프로젝트입니다."
+        "금융 빅데이터 플랫폼의 외부데이터 결합 필요성을 "
+        "공공데이터 기반으로 검증한 프로젝트입니다."
     )
 
     st.sidebar.markdown("### Data")
@@ -73,9 +69,11 @@ def render_sidebar():
     st.sidebar.markdown("### Methodology")
     st.sidebar.markdown(
         "- **Model:** XGBoost (+ LR Baseline)\n"
-        "- **Split:** Time-based (train ~2024Q3, test 2024Q4~)\n"
+        "- **Split:** Time-based\n"
+        "  - Train: 2019Q1 ~ 2024Q3\n"
+        "  - Test: 2024Q4 ~ 2025Q3\n"
         "- **Target:** Next-quarter closure rate > threshold\n"
-        "- **Experiments:** 11 independent ablation tests\n"
+        "- **검증 실험:** 11개\n"
         "- **Interpretation:** SHAP + Feature Ablation"
     )
 
@@ -94,7 +92,20 @@ def render_sidebar():
 # Tab 1: Project Motivation
 # ================================================================
 def tab_motivation():
-    st.header("1. Project Motivation: 플랫폼이 인정한 한계")
+    st.header("1. 외부데이터 결합 필요성에 대한 실증 검증")
+
+    # Executive Summary KPI cards
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.metric("Dataset", "570K rows", help="2.9M raw → 570K mart")
+    with k2:
+        st.metric("Model AUROC", "0.7829", help="XGB Strict (Card + Store)")
+    with k3:
+        st.metric("External Lift", "≈ 0", help="ΔAUROC: -0.002 ~ +0.004")
+    with k4:
+        st.metric("검증 실험", "11개")
+
+    st.markdown("---")
 
     col1, col2 = st.columns([3, 2])
 
@@ -128,17 +139,31 @@ def tab_motivation():
         )
 
     with col2:
-        st.markdown("#### 확인된 플랫폼 한계")
-        limitations = {
-            "예측 기능 없음": "현황 분석만 제공, 미래 예측 불가",
-            "폐업 데이터 미포함": "데이터폴리오에 폐업 변수 없음",
-            "시계열 분석 불가": "전월 1개월 스냅샷만 제공",
-            "입지 추천 없음": "기존 상위 매출 매장 리스트만 제공",
-            "경쟁 분석 제한적": "간접적 프록시 지표만 가능",
+        st.markdown("#### 직접 사용 과정에서 보완 여지가 보인 지점")
+        improvements = {
+            "현황 분석 중심, 예측 기능 확장 여지": "현재 스냅샷 분석 제공, 예측 모델 확장 가능",
+            "폐업 리스크 변수의 직접 제공 제한": "데이터폴리오에서 폐업 관련 변수 제한적",
+            "장기 시계열 비교 기능 보완 여지": "전월 1개월 스냅샷 기준, 추이 비교 확장 가능",
+            "입지 의사결정용 추천 기능 확장 가능": "현재 상위 매출 매장 리스트 제공",
+            "경쟁 상권 비교 기능 고도화 여지": "간접적 프록시 지표 활용 중",
         }
-        for title, desc in limitations.items():
+        for title, desc in improvements.items():
             st.markdown(f"**{title}**")
             st.caption(desc)
+
+    st.markdown("---")
+
+    # Target definition box
+    st.markdown("#### 타겟 정의")
+    st.markdown(
+        """
+        t분기 피처를 사용해 **t+1분기** high-risk 여부를 예측합니다.
+        - **Primary target:** 다음 분기 폐업률이 해당 업종 중앙값의 1.5배 초과
+        - **Normalized target:** 다음 분기 폐업률이 같은 업종·분기 평균을 초과
+
+        모든 피처는 예측 대상 분기 이전 시점의 정보만 사용하며, LEAD 윈도우 함수로 시점 분리를 보장합니다.
+        """
+    )
 
     st.markdown("---")
     st.markdown("#### 핵심 질문 3개")
@@ -157,9 +182,8 @@ def tab_motivation():
 def tab_ablation():
     st.header("2. Ablation Study: 외부 데이터 증분효과 검증")
 
-    st.markdown("#### 원본 타겟 (절대 폐업률 예측)")
+    st.markdown("#### AUROC 절대값 비교")
 
-    # Ablation results - hardcoded from experiments
     ablation_data = pd.DataFrame([
         {"Model": "LR Baseline", "AUROC": 0.6325, "Type": "Baseline"},
         {"Model": "Card Only (A)", "AUROC": 0.7830, "Type": "Card"},
@@ -181,8 +205,8 @@ def tab_ablation():
     fig.add_hline(y=0.7830, line_dash="dash", line_color="#4682B4",
                   annotation_text="Card Only baseline: 0.7830")
     fig.update_layout(
-        height=400, showlegend=True,
-        yaxis_range=[0.6, 0.80],
+        height=450, showlegend=True,
+        yaxis_range=[0, 0.85],
         xaxis_tickangle=-30,
     )
     st.plotly_chart(fig, use_container_width=True)
@@ -198,10 +222,35 @@ def tab_ablation():
 
     st.markdown("---")
 
-    st.markdown("#### Naive Baseline 비교")
-    st.markdown(
-        "모델의 실질적 기여를 파악하려면 naive baseline과 비교해야 합니다."
+    # Delta plot
+    st.markdown("#### Card Only 대비 ΔAUROC")
+
+    delta_data = pd.DataFrame([
+        {"External Data": "Traffic", "Delta": 0.0007},
+        {"External Data": "Change Index", "Delta": 0.0005},
+        {"External Data": "Facilities", "Delta": 0.0007},
+        {"External Data": "CSI (Macro)", "Delta": -0.0016},
+        {"External Data": "Residents", "Delta": 0.0010},
+        {"External Data": "ALL External", "Delta": -0.0018},
+    ])
+
+    fig_delta = px.bar(
+        delta_data, x="External Data", y="Delta",
+        color=delta_data["Delta"].apply(lambda x: "Positive" if x >= 0 else "Negative"),
+        color_discrete_map={"Positive": "#2E8B57", "Negative": "#E8744F"},
+        text=delta_data["Delta"].apply(lambda x: f"{x:+.4f}"),
     )
+    fig_delta.add_hline(y=0, line_color="black", line_width=1)
+    fig_delta.update_layout(
+        height=350, showlegend=False,
+        yaxis_title="ΔAUROC vs Card Only",
+    )
+    st.plotly_chart(fig_delta, use_container_width=True)
+
+    st.markdown("---")
+
+    st.markdown("#### Naive Baseline 비교")
+    st.markdown("모델의 실질적 기여를 파악하려면 naive baseline과 비교해야 합니다.")
 
     naive_data = pd.DataFrame([
         {"Model": "Naive: 직전 분기 폐업률", "AUROC": 0.6059, "Category": "Naive"},
@@ -215,12 +264,17 @@ def tab_ablation():
         color_discrete_map={"Naive": "#CCCCCC", "XGBoost": "#4682B4"},
         text=naive_data["AUROC"].apply(lambda x: f"{x:.4f}"),
     )
-    fig2.update_layout(height=350, yaxis_range=[0.5, 0.82], xaxis_tickangle=-20)
+    fig2.update_layout(height=400, yaxis_range=[0, 0.85], xaxis_tickangle=-20)
     st.plotly_chart(fig2, use_container_width=True)
 
     st.caption(
         "XGBoost는 최선의 naive baseline(store_count 단독, 0.7445) 대비 "
         "+0.038 AUROC 개선. P@100 = 99%는 주로 store_count의 크기 효과에 기인합니다."
+    )
+
+    business_takeaway(
+        "카드·점포 데이터가 확보된 환경에서는 공공 외부데이터 추가보다 "
+        "내부 결제 패턴 고도화가 우선순위일 수 있습니다."
     )
 
 
@@ -247,7 +301,7 @@ def tab_industry():
             color_continuous_scale="RdYlGn_r",
         )
         fig.update_layout(
-            height=600,
+            height=650,
             yaxis=dict(autorange="reversed"),
             xaxis_title="평균 분기 폐업률",
             yaxis_title="",
@@ -257,10 +311,9 @@ def tab_industry():
 
     with col2:
         st.markdown("#### 업종별 폐업률 차이")
-        st.markdown(
-            "Kruskal-Wallis H=36,494, p≈0\n\n"
-            "업종 간 폐업률 차이는 극도로 유의합니다."
-        )
+        st.markdown("Kruskal-Wallis H=36,494, **p < 0.001**")
+        st.markdown("업종 간 폐업률 차이는 극도로 유의합니다.")
+
         st.markdown("---")
         st.markdown("#### 3-Tier 모니터링 제안")
         st.markdown(
@@ -277,6 +330,10 @@ def tab_industry():
         "업종 특성을 반영한 차등 체계가 효율적입니다."
     )
 
+    business_takeaway(
+        "동일 임계값보다 업종별 기준을 적용한 차등 모니터링이 더 효율적입니다."
+    )
+
 
 # ================================================================
 # Tab 4: SHAP & Redundancy
@@ -286,39 +343,32 @@ def tab_shap():
 
     st.markdown("#### SHAP 기여도: 원본 vs 정규화 타겟")
 
-    col1, col2 = st.columns(2)
+    # Stacked horizontal bar instead of pie
+    shap_data = pd.DataFrame({
+        "Target": ["원본 타겟\n(with store_count)", "원본 타겟\n(with store_count)", "원본 타겟\n(with store_count)",
+                   "정규화 타겟\n(no store_count)", "정규화 타겟\n(no store_count)", "정규화 타겟\n(no store_count)"],
+        "Group": ["Store Context", "Card Sales", "External"] * 2,
+        "SHAP %": [73, 19, 6, 36.6, 32.9, 30.5],
+    })
 
-    with col1:
-        st.markdown("**원본 타겟 (with store_count)**")
-        original_shap = pd.DataFrame({
-            "Group": ["Store Context", "Card Sales", "External"],
-            "SHAP %": [73, 19, 6],
-        })
-        fig1 = px.pie(original_shap, values="SHAP %", names="Group",
-                      color="Group",
-                      color_discrete_map={
-                          "Store Context": "#4682B4",
-                          "Card Sales": "#87CEEB",
-                          "External": "#E8744F"
-                      })
-        fig1.update_layout(height=300)
-        st.plotly_chart(fig1, use_container_width=True)
-
-    with col2:
-        st.markdown("**정규화 타겟 (no store_count)**")
-        norm_shap = pd.DataFrame({
-            "Group": ["Store Context", "Card Sales", "External"],
-            "SHAP %": [36.6, 32.9, 30.5],
-        })
-        fig2 = px.pie(norm_shap, values="SHAP %", names="Group",
-                      color="Group",
-                      color_discrete_map={
-                          "Store Context": "#4682B4",
-                          "Card Sales": "#87CEEB",
-                          "External": "#E8744F"
-                      })
-        fig2.update_layout(height=300)
-        st.plotly_chart(fig2, use_container_width=True)
+    fig = px.bar(
+        shap_data, x="SHAP %", y="Target", color="Group",
+        orientation="h",
+        color_discrete_map={
+            "Store Context": "#4682B4",
+            "Card Sales": "#87CEEB",
+            "External": "#E8744F"
+        },
+        text=shap_data["SHAP %"].apply(lambda x: f"{x}%"),
+        barmode="stack",
+    )
+    fig.update_layout(
+        height=250,
+        xaxis_title="SHAP Contribution %",
+        yaxis_title="",
+        legend_title="Feature Group",
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
@@ -343,28 +393,29 @@ def tab_shap():
         "그러나 카드 데이터가 있는 한, 공공 외부데이터는 이를 보강하지 못합니다."
     )
 
-    # Display SHAP figures if available
-    def fit_to_canvas(img, width=700, height=750):
-        from PIL import Image as PILImage
-        canvas = PILImage.new("RGB", (width, height), "white")
-        ratio = min(width / img.width, height / img.height)
-        new_w = int(img.width * ratio)
-        new_h = int(img.height * ratio)
-        resized = img.resize((new_w, new_h))
-        x = (width - new_w) // 2
-        y = (height - new_h) // 2
-        canvas.paste(resized, (x, y))
-        return canvas
+    # SHAP summary plots
+    st.markdown("---")
+
+    def resize_to_height(img, target_height=560):
+        ratio = target_height / img.height
+        new_width = int(img.width * ratio)
+        return img.resize((new_width, target_height))
 
     col1, col2 = st.columns(2)
     with col1:
         img = load_figure("model_02_shap_summary.png")
         if img:
-            st.image(fit_to_canvas(img), caption="SHAP Summary (원본 타겟)", use_container_width=True)
+            st.image(resize_to_height(img), caption="SHAP Summary (원본 타겟)", use_container_width=True)
     with col2:
         img = load_figure("model_12_normalized_shap.png")
         if img:
-            st.image(fit_to_canvas(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
+            st.image(resize_to_height(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
+
+    business_takeaway(
+        "외부데이터는 카드 데이터의 보강재라기보다, "
+        "카드 이력이 부족한 신규/현금 중심 가맹점의 대체재로 활용 가능합니다."
+    )
+
 
 # ================================================================
 # Tab 5: Temporal Trend
@@ -393,7 +444,7 @@ def tab_trend():
         secondary_y=True,
     )
     fig.update_layout(
-        height=400,
+        height=500,
         title="분기별 평균 폐업률 추이",
         xaxis_title="분기",
     )
@@ -415,10 +466,15 @@ def tab_trend():
                        mode="lines+markers"),
             secondary_y=True,
         )
-        fig2.update_layout(height=350, title="분기별 매출 vs 유동인구 추이")
+        fig2.update_layout(height=450, title="분기별 매출 vs 유동인구 추이")
         fig2.update_yaxes(title_text="평균 매출", secondary_y=False)
         fig2.update_yaxes(title_text="평균 유동인구", secondary_y=True)
         st.plotly_chart(fig2, use_container_width=True)
+
+    business_takeaway(
+        "2020~2021 COVID-19 기간의 폐업률 급변이 모델 학습에 포함되어 있으며, "
+        "정상 시기 일반화 성능 검증은 향후 과제입니다."
+    )
 
 
 # ================================================================
@@ -432,9 +488,9 @@ def tab_insights():
     findings = [
         (
             "공공 외부데이터의 증분효과는 제한적",
-            "11개 독립 실험에서 일관되게 확인. 역방향 ablation에서는 "
+            "11개 검증 실험에서 일관되게 확인. 역방향 ablation에서는 "
             "외부 데이터 제거 시 오히려 성능이 개선되었습니다.",
-            "-0.0018 ~ +0.004"
+            "-0.002 ~ +0.004"
         ),
         (
             "SHAP 30.5% ≠ AUROC +0.001 (Feature Redundancy)",
@@ -471,11 +527,16 @@ def tab_insights():
     st.markdown("#### BC카드 시사점")
 
     proposals = [
-        ("결제·가맹점 데이터 심화 분석 우선", "외부 공공데이터 확장보다 자체 결제 패턴 심화가 더 높은 우선순위"),
-        ("업종별 차등 모니터링", "폐업률이 10배 이상 다른 업종에 동일 임계값은 비효율적"),
-        ("외부 데이터의 가치는 '대체재'", "카드 데이터 부족 시(신규 가맹점 등) 부분적 대체재로 활용 가능"),
-        ("상권변화지표 맥락 정보 보강", "'다이나믹 = 위험'이 아닌 '개폐업 회전이 빠른 상권'으로 안내"),
-        ("예측 기능 상품화 가능성", "현황 분석에서 예측으로 확장하면 데이터 상품 차별화 가능"),
+        ("결제·가맹점 데이터 심화 분석 우선",
+         "외부 공공데이터 확장보다 자체 결제 패턴 심화가 더 높은 우선순위"),
+        ("업종별 차등 모니터링",
+         "폐업률이 10배 이상 다른 업종에 동일 임계값은 비효율적"),
+        ("외부 데이터의 가치는 '대체재'",
+         "카드 데이터 부족 시(신규 가맹점 등) 부분적 대체재로 활용 가능"),
+        ("상권변화지표 맥락 정보 보강",
+         "'다이나믹 = 위험'이 아닌 '개폐업 회전이 빠른 상권'으로 안내"),
+        ("예측 기능 상품화 가능성",
+         "현황 분석에서 예측으로 확장하면 데이터 상품 차별화 가능"),
     ]
 
     for title, desc in proposals:
