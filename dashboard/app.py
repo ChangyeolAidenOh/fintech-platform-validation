@@ -100,6 +100,15 @@ def render_sidebar():
 def tab_motivation():
     st.header("1. 외부데이터 결합 필요성에 대한 실증 검증")
 
+    st.markdown(
+        "> **Key Question:** 공공 외부데이터는 추정매출·점포 구조 변수 대비 "
+        "실제로 추가 예측력을 제공하는가?"
+    )
+    st.markdown(
+        "> **Finding:** 본 공공데이터 환경에서는 증분효과가 제한적이었으며, "
+        "외부데이터는 보강재보다 결제 이력이 부족한 경우의 부분적 대체재로 해석됩니다."
+    )
+
     # Executive Summary KPI cards
     k1, k2, k3, k4 = st.columns(4)
     with k1:
@@ -125,9 +134,9 @@ def tab_motivation():
         )
 
         st.info(
-            "💬 \"카드 결제 데이터(추정매출)만으로 폐업을 완벽하게 예측하는 건 "
-            "어렵습니다. 인허가 정보, 사업자 신고 상태, 주변 시장 상황 등 "
-            "여러 데이터가 같이 참고되어야 정확도가 올라가요.\""
+            "플랫폼 AI검색은 카드 매출 외에도 인허가, 사업자 상태, "
+            "주변 시장 상황 등 외부 맥락 데이터가 필요할 수 있다고 안내했습니다. "
+            "본 프로젝트는 그중 공공 수준에서 확보 가능한 환경 데이터의 증분효과를 검증했습니다."
         )
 
         st.markdown(
@@ -365,7 +374,7 @@ def tab_shap():
     shap_data = pd.DataFrame({
         "Target": ["원본 타겟 (with store_count)", "원본 타겟 (with store_count)", "원본 타겟 (with store_count)",
                    "정규화 타겟 (no store_count)", "정규화 타겟 (no store_count)", "정규화 타겟 (no store_count)"],
-        "Group": ["Store Context", "Sales Proxy", "External"] * 2,
+        "Group": ["점포 구조 변수", "Sales Proxy", "External"] * 2,
         "SHAP %": [73, 19, 6, 36.6, 32.9, 30.5],
     })
 
@@ -373,7 +382,7 @@ def tab_shap():
         shap_data, x="SHAP %", y="Target", color="Group",
         orientation="h",
         color_discrete_map={
-            "Store Context": "#4682B4",
+            "점포 구조 변수": "#4682B4",
             "Sales Proxy": "#87CEEB",
             "External": "#E8744F"
         },
