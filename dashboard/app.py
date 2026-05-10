@@ -1,5 +1,5 @@
 """
-Fintech Platform Validation — Streamlit Dashboard
+Fintech Platform Validation — Streamlit Dashboard v3
 """
 
 import os
@@ -53,8 +53,15 @@ def render_sidebar():
 
     st.sidebar.markdown("### About")
     st.sidebar.markdown(
-        "금융 빅데이터 플랫폼의 외부데이터 결합 필요성을 "
+        "국내 카드사 금융빅데이터플랫폼의 외부데이터 결합 필요성을 "
         "공공데이터 기반으로 검증한 프로젝트입니다."
+    )
+
+    st.sidebar.markdown(
+        '<small>본 프로젝트는 카드사 내부 데이터가 아닌 '
+        '서울시 공공 상권 데이터를 사용했으며, '
+        '공공 외부데이터의 증분효과 검증에 목적이 있습니다.</small>',
+        unsafe_allow_html=True,
     )
 
     st.sidebar.markdown("### Data")
@@ -98,7 +105,7 @@ def tab_motivation():
     with k1:
         st.metric("Dataset", "570K rows", help="2.9M raw → 570K mart")
     with k2:
-        st.metric("Model AUROC", "0.7829", help="XGB Strict (Card + Store)")
+        st.metric("Model AUROC", "0.7829", help="XGB Strict (추정매출 + 점포)")
     with k3:
         st.metric("External Lift", "≈ 0", help="ΔAUROC: -0.002 ~ +0.004")
     with k4:
@@ -111,7 +118,7 @@ def tab_motivation():
     with col1:
         st.markdown(
             """
-            금융 빅데이터 플랫폼(ABP)에 직접 가입하여 AI검색 기능을 사용했습니다.
+            국내 카드사의 AI금융빅데이터플랫폼에 직접 가입하여 AI검색 기능을 사용했습니다.
             **"카드 결제 데이터만으로 폐업을 예측할 수 있나요?"** 라고 질문했을 때,
             플랫폼은 다음과 같이 안내했습니다:
             """
@@ -160,7 +167,8 @@ def tab_motivation():
         - **Primary target:** 다음 분기 폐업률이 해당 업종 중앙값의 1.5배 초과
         - **Normalized target:** 다음 분기 폐업률이 같은 업종·분기 평균을 초과
 
-        모든 피처는 예측 대상 분기 이전 시점의 정보만 사용하며, LEAD 윈도우 함수로 시점 분리를 보장합니다.
+        모든 피처는 예측 대상 분기 이전 시점의 정보만 사용하며,
+        LEAD 윈도우 함수로 시점 분리를 보장합니다.
         """
     )
 
@@ -181,56 +189,29 @@ def tab_motivation():
 def tab_ablation():
     st.header("2. Ablation Study: 외부 데이터 증분효과 검증")
 
-    st.markdown("#### AUROC 절대값 비교")
+    # Delta emphasis first
+    st.markdown("#### 핵심: 추정매출 기반 대비 변화량(ΔAUROC)")
 
-    ablation_data = pd.DataFrame([
-        {"Model": "LR Baseline", "AUROC": 0.6325, "Type": "Baseline"},
-        {"Model": "Card Only (A)", "AUROC": 0.7830, "Type": "Card"},
-        {"Model": "Card + All External (B)", "AUROC": 0.7811, "Type": "Full"},
-        {"Model": "Card + Traffic", "AUROC": 0.7836, "Type": "Individual"},
-        {"Model": "Card + Change Index", "AUROC": 0.7834, "Type": "Individual"},
-        {"Model": "Card + Facilities", "AUROC": 0.7837, "Type": "Individual"},
-        {"Model": "Card + CSI", "AUROC": 0.7813, "Type": "Individual"},
-        {"Model": "Card + Residents", "AUROC": 0.7840, "Type": "Individual"},
-    ])
-
-    color_map = {"Baseline": "#CCCCCC", "Card": "#4682B4", "Full": "#2E8B57", "Individual": "#E8744F"}
-
-    fig = px.bar(
-        ablation_data, x="Model", y="AUROC", color="Type",
-        color_discrete_map=color_map,
-        text=ablation_data["AUROC"].apply(lambda x: f"{x:.4f}"),
-    )
-    fig.add_hline(y=0.7830, line_dash="dash", line_color="#4682B4",
-                  annotation_text="Card Only baseline: 0.7830")
-    fig.update_layout(
-        height=450, showlegend=True,
-        yaxis_range=[0, 0.85],
-        xaxis_tickangle=-30,
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Card Only AUROC", "0.7830")
-    with col2:
-        st.metric("Card + External AUROC", "0.7811", delta="-0.0018")
-    with col3:
-        st.metric("외부 데이터 제거 시", "0.7830", delta="+0.0018",
-                  help="역방향 ablation: 외부 데이터를 전부 빼면 오히려 개선")
+    d1, d2, d3 = st.columns(3)
+    with d1:
+        st.metric("추정매출+점포 (A)", "0.7830", help="외부 데이터 없이")
+    with d2:
+        st.metric("+ 전체 외부 (B)", "0.7811", delta="-0.0018", delta_color="inverse")
+    with d3:
+        st.metric("외부 제거 시", "+0.0018", help="역방향 ablation: 제거 시 개선")
 
     st.markdown("---")
 
-    # Delta plot
-    st.markdown("#### Card Only 대비 ΔAUROC")
+    # Delta plot first (key message)
+    st.markdown("#### 추정매출 기반 대비 ΔAUROC (개별 외부 데이터)")
 
     delta_data = pd.DataFrame([
-        {"External Data": "Traffic", "Delta": 0.0007},
-        {"External Data": "Change Index", "Delta": 0.0005},
-        {"External Data": "Facilities", "Delta": 0.0007},
-        {"External Data": "CSI (Macro)", "Delta": -0.0016},
-        {"External Data": "Residents", "Delta": 0.0010},
-        {"External Data": "ALL External", "Delta": -0.0018},
+        {"External Data": "유동인구", "Delta": 0.0007},
+        {"External Data": "상권변화지표", "Delta": 0.0005},
+        {"External Data": "집객시설", "Delta": 0.0007},
+        {"External Data": "CSI (거시경제)", "Delta": -0.0016},
+        {"External Data": "상주인구", "Delta": 0.0010},
+        {"External Data": "전체 외부", "Delta": -0.0018},
     ])
 
     fig_delta = px.bar(
@@ -241,10 +222,47 @@ def tab_ablation():
     )
     fig_delta.add_hline(y=0, line_color="black", line_width=1)
     fig_delta.update_layout(
-        height=350, showlegend=False,
-        yaxis_title="ΔAUROC vs Card Only",
+        height=400, showlegend=False,
+        yaxis_title="ΔAUROC vs 추정매출 기반",
     )
     st.plotly_chart(fig_delta, use_container_width=True)
+
+    st.caption(
+        "개별 외부 데이터의 증분효과는 ΔAUROC ±0.002 이내로, "
+        "기존 추정매출·점포 변수 대비 추가 정보량이 제한적입니다."
+    )
+
+    st.markdown("---")
+
+    # Absolute AUROC chart
+    st.markdown("#### AUROC 절대값 비교")
+
+    ablation_data = pd.DataFrame([
+        {"Model": "LR Baseline", "AUROC": 0.6325, "Type": "Baseline"},
+        {"Model": "추정매출+점포 (A)", "AUROC": 0.7830, "Type": "Sales Proxy"},
+        {"Model": "A + 전체 외부 (B)", "AUROC": 0.7811, "Type": "Full"},
+        {"Model": "A + 유동인구", "AUROC": 0.7836, "Type": "Individual"},
+        {"Model": "A + 상권변화", "AUROC": 0.7834, "Type": "Individual"},
+        {"Model": "A + 집객시설", "AUROC": 0.7837, "Type": "Individual"},
+        {"Model": "A + CSI", "AUROC": 0.7813, "Type": "Individual"},
+        {"Model": "A + 상주인구", "AUROC": 0.7840, "Type": "Individual"},
+    ])
+
+    color_map = {"Baseline": "#CCCCCC", "Sales Proxy": "#4682B4", "Full": "#2E8B57", "Individual": "#E8744F"}
+
+    fig = px.bar(
+        ablation_data, x="Model", y="AUROC", color="Type",
+        color_discrete_map=color_map,
+        text=ablation_data["AUROC"].apply(lambda x: f"{x:.4f}"),
+    )
+    fig.add_hline(y=0.7830, line_dash="dash", line_color="#4682B4",
+                  annotation_text="추정매출+점포 baseline: 0.7830")
+    fig.update_layout(
+        height=450, showlegend=True,
+        yaxis_range=[0, 0.85],
+        xaxis_tickangle=-30,
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
@@ -255,7 +273,7 @@ def tab_ablation():
         {"Model": "Naive: 직전 분기 폐업률", "AUROC": 0.6059, "Category": "Naive"},
         {"Model": "Naive: 업종 평균", "AUROC": 0.6049, "Category": "Naive"},
         {"Model": "Naive: store_count 단독", "AUROC": 0.7445, "Category": "Naive"},
-        {"Model": "XGB: Card + Store (strict)", "AUROC": 0.7829, "Category": "XGBoost"},
+        {"Model": "XGB: 추정매출+점포 (strict)", "AUROC": 0.7829, "Category": "XGBoost"},
     ])
 
     fig2 = px.bar(
@@ -268,11 +286,11 @@ def tab_ablation():
 
     st.caption(
         "XGBoost는 최선의 naive baseline(store_count 단독, 0.7445) 대비 "
-        "+0.038 AUROC 개선. P@100 = 99%는 주로 store_count의 크기 효과에 기인합니다."
+        "+0.038 AUROC 개선. P@100의 높은 수치는 주로 store_count의 크기 효과에 기인합니다."
     )
 
     business_takeaway(
-        "카드·점포 데이터가 확보된 환경에서는 공공 외부데이터 추가보다 "
+        "추정매출·점포 데이터가 확보된 환경에서는 공공 외부데이터 추가보다 "
         "내부 결제 패턴 고도화가 우선순위일 수 있습니다."
     )
 
@@ -316,7 +334,8 @@ def tab_industry():
         st.markdown("---")
         st.markdown("#### 3-Tier 모니터링 제안")
         st.markdown(
-            "**Tier 1 (고회전):** 치킨, 편의점, 패스트푸드\n\n"
+            "**Tier 1 (고회전·고변동):** 치킨, 편의점, 패스트푸드\n"
+            "폐업 발생 빈도와 점포 회전이 높은 업종\n\n"
             "**Tier 2 (중간):** 커피, 분식, 중식\n\n"
             "**Tier 3 (안정):** 의원, 치과, 가전"
         )
@@ -330,7 +349,8 @@ def tab_industry():
     )
 
     business_takeaway(
-        "동일 임계값보다 업종별 기준을 적용한 차등 모니터링이 더 효율적입니다."
+        "동일 임계값보다 업종별 기준을 적용한 차등 모니터링이 더 효율적입니다. "
+        "고회전 업종(치킨, 편의점 등)은 폐업률 자체가 높다기보다, 점포 진입·퇴출 회전이 빠른 구조입니다."
     )
 
 
@@ -342,11 +362,10 @@ def tab_shap():
 
     st.markdown("#### SHAP 기여도: 원본 vs 정규화 타겟")
 
-    # Stacked horizontal bar instead of pie
     shap_data = pd.DataFrame({
-        "Target": ["원본 타겟\n(with store_count)", "원본 타겟\n(with store_count)", "원본 타겟\n(with store_count)",
-                   "정규화 타겟\n(no store_count)", "정규화 타겟\n(no store_count)", "정규화 타겟\n(no store_count)"],
-        "Group": ["Store Context", "Card Sales", "External"] * 2,
+        "Target": ["원본 타겟 (with store_count)", "원본 타겟 (with store_count)", "원본 타겟 (with store_count)",
+                   "정규화 타겟 (no store_count)", "정규화 타겟 (no store_count)", "정규화 타겟 (no store_count)"],
+        "Group": ["Store Context", "Sales Proxy", "External"] * 2,
         "SHAP %": [73, 19, 6, 36.6, 32.9, 30.5],
     })
 
@@ -355,7 +374,7 @@ def tab_shap():
         orientation="h",
         color_discrete_map={
             "Store Context": "#4682B4",
-            "Card Sales": "#87CEEB",
+            "Sales Proxy": "#87CEEB",
             "External": "#E8744F"
         },
         text=shap_data["SHAP %"].apply(lambda x: f"{x}%"),
@@ -381,18 +400,17 @@ def tab_shap():
         - SHAP: 모델이 피처를 **얼마나 사용하는가**
         - AUROC: 피처를 **추가했을 때 판별력이 올라가는가**
 
-        외부 피처가 카드 피처와 상관되어 있으면, 모델은 사용하지만(SHAP > 0)
+        외부 피처가 추정매출 피처와 상관되어 있으면, 모델은 사용하지만(SHAP > 0)
         새로운 정보를 추가하지는 않습니다(AUROC ≈ 0).
         """
     )
 
     st.info(
-        "💡 **실무적 시사점:** 카드 데이터가 없는 상황(신규 가맹점, 현금 위주 점포)에서는 "
+        "💡 **실무적 시사점:** 결제 데이터가 없는 상황(신규 가맹점, 현금 위주 점포)에서는 "
         "외부 공공데이터가 부분적 대체재로 기능할 수 있습니다. "
-        "그러나 카드 데이터가 있는 한, 공공 외부데이터는 이를 보강하지 못합니다."
+        "그러나 결제 데이터가 있는 한, 공공 외부데이터는 이를 보강하지 못합니다."
     )
 
-    # SHAP summary plots
     st.markdown("---")
 
     # Display SHAP figures if available
@@ -419,8 +437,8 @@ def tab_shap():
             st.image(fit_to_canvas(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
     business_takeaway(
-        "외부데이터는 카드 데이터의 보강재라기보다, "
-        "카드 이력이 부족한 신규/현금 중심 가맹점의 대체재로 활용 가능합니다."
+        "외부데이터는 결제 데이터의 보강재라기보다, "
+        "결제 이력이 부족한 신규/현금 중심 가맹점의 대체재로 활용 가능합니다."
     )
 
 
@@ -429,6 +447,12 @@ def tab_shap():
 # ================================================================
 def tab_trend():
     st.header("5. 시계열 트렌드")
+
+    st.markdown(
+        "이 탭은 데이터 기간 내 구조적 변화를 확인하기 위한 sanity check입니다. "
+        "폐업률과 매출·점포 구조 변화가 함께 움직이는지, "
+        "모델 결과가 특정 분기나 COVID 구간에만 의존하는지 점검합니다."
+    )
 
     trend_df = load_csv("quarterly_trend.csv")
     if trend_df is None:
@@ -496,13 +520,15 @@ def tab_insights():
         (
             "공공 외부데이터의 증분효과는 제한적",
             "11개 검증 실험에서 일관되게 확인. 역방향 ablation에서는 "
-            "외부 데이터 제거 시 오히려 성능이 개선되었습니다.",
-            "-0.002 ~ +0.004"
+            "외부 데이터 제거 시 오히려 성능이 개선되었습니다. "
+            "기존 추정매출·점포 변수 대비 추가 정보량이 제한적입니다.",
+            "ΔAUROC: -0.002 ~ +0.004"
         ),
         (
             "SHAP 30.5% ≠ AUROC +0.001 (Feature Redundancy)",
-            "외부 데이터는 카드 데이터와 중복 신호를 포착합니다. "
-            "모델이 '사용'하지만 '새 정보'는 아닙니다.",
+            "정규화 타겟에서 외부 데이터의 SHAP 기여도가 30.5%까지 상승하지만, "
+            "이는 추정매출 피처와의 중복 신호입니다. "
+            "모델이 '사용'하지만 '새 정보'를 제공하지는 않습니다.",
             "Redundancy"
         ),
         (
@@ -514,8 +540,9 @@ def tab_insights():
         (
             "폐업은 특정 업종에 구조적으로 집중",
             "치킨(13.4%), 편의점(13.3%), 패스트푸드(10.5%) vs "
-            "의원(1.1%), 가전(1.6%). 10배 이상 차이.",
-            "업종 집중"
+            "의원(1.1%), 가전(1.6%). 10배 이상 차이. "
+            "이들은 '위험 업종'이라기보다 점포 진입·퇴출 회전이 빠른 고변동 업종입니다.",
+            "업종별 구조 차이"
         ),
         (
             "누수(Leakage) 검증 완료",
@@ -531,7 +558,7 @@ def tab_insights():
             st.caption(f"핵심 수치: {metric}")
 
     st.markdown("---")
-    st.markdown("#### BC카드 시사점")
+    st.markdown("#### 카드사 데이터 플랫폼 관점의 시사점")
 
     proposals = [
         ("결제·가맹점 데이터 심화 분석 우선",
@@ -539,7 +566,7 @@ def tab_insights():
         ("업종별 차등 모니터링",
          "폐업률이 10배 이상 다른 업종에 동일 임계값은 비효율적"),
         ("외부 데이터의 가치는 '대체재'",
-         "카드 데이터 부족 시(신규 가맹점 등) 부분적 대체재로 활용 가능"),
+         "결제 데이터 부족 시(신규 가맹점 등) 부분적 대체재로 활용 가능"),
         ("상권변화지표 맥락 정보 보강",
          "'다이나믹 = 위험'이 아닌 '개폐업 회전이 빠른 상권'으로 안내"),
         ("예측 기능 상품화 가능성",
@@ -557,6 +584,13 @@ def tab_insights():
         "- COVID-19 기간 포함 (2019~2025)\n"
         "- 서울 지역 한정\n"
         "- 분기 단위 시간 해상도 (실시간 감지 불가)"
+    )
+
+    st.markdown("---")
+    st.caption(
+        "본 프로젝트는 카드사 내부 데이터가 아닌 서울시 공공 상권 데이터를 사용했으며, "
+        "개별 가맹점 단위 모델을 대체하기보다 공공 외부데이터의 증분효과를 검증하는 데 목적이 있습니다. "
+        "AUPRC random baseline = test set positive rate (0.228)."
     )
 
 
