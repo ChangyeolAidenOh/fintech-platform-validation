@@ -350,21 +350,12 @@ def tab_shap():
     with col1:
         img = load_figure("model_02_shap_summary.png")
         if img:
-            st.image(
-                img,
-                caption="SHAP Summary (원본 타겟)",
-                use_container_width=True
-            )
+            st.image(img, caption="SHAP Summary (원본 타겟)", use_container_width=True)
 
     with col2:
         img = load_figure("model_12_normalized_shap.png")
         if img:
-            st.image(
-                img,
-                caption="SHAP Summary (정규화, no store_count)",
-                use_container_width=True
-            )
-
+            st.image(img, caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
 # ================================================================
 # Tab 5: Temporal Trend
