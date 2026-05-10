@@ -345,16 +345,19 @@ def tab_shap():
 
     # Display SHAP figures if available
     st.markdown("---")
+    col1, col2 = st.columns(2)
 
-    img = load_figure("model_02_shap_summary.png")
-    if img:
-        img_resized = img.resize((900, 750))
-        st.image(img_resized, caption="SHAP Summary (원본 타겟)", use_container_width=False)
+    with col1:
+        img = load_figure("model_02_shap_summary.png")
+        if img:
+            img_resized = img.resize((750, 625))
+            st.image(img_resized, caption="SHAP Summary (원본 타겟)", use_container_width=True)
 
-    img = load_figure("model_12_normalized_shap.png")
-    if img:
-        img_resized = img.resize((900, 750))
-        st.image(img_resized, caption="SHAP Summary (정규화, no store_count)", use_container_width=False)
+    with col2:
+        img = load_figure("model_12_normalized_shap.png")
+        if img:
+            img_resized = img.resize((750, 625))
+            st.image(img_resized, caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
 
 # ================================================================
