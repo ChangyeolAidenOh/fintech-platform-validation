@@ -19,4 +19,5 @@ Thumbs.db
 .ipynb_checkpoints/
 
 # Archives
-*.zip
+*.zip!data/exports/
+!data/exports/*.csv
