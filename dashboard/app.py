@@ -144,11 +144,11 @@ def tab_motivation():
     st.markdown("#### 핵심 질문 3개")
     q1, q2, q3 = st.columns(3)
     with q1:
-        st.metric("Q1", "어떤 외부 데이터가 유효한가?")
+        st.metric("Q1", "외부 데이터 유효성")
     with q2:
-        st.metric("Q2", "업종별로 다른가?")
+        st.metric("Q2", "업종별 차이")
     with q3:
-        st.metric("Q3", "예측력이 얼마나 개선되는가?")
+        st.metric("Q3", "예측력 개선 정도")
 
 
 # ================================================================
@@ -349,11 +349,13 @@ def tab_shap():
     with col1:
         img = load_figure("model_02_shap_summary.png")
         if img:
-            st.image(img, caption="SHAP Summary (원본 타겟)", use_container_width=True)
+            img_resized = img.resize((700, 560))
+            st.image(img_resized, caption="SHAP Summary (원본 타겟)", use_container_width=True)
     with col2:
         img = load_figure("model_12_normalized_shap.png")
         if img:
-            st.image(img, caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
+            img_resized = img.resize((700, 560))
+            st.image(img_resized, caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
 
 # ================================================================
@@ -366,6 +368,8 @@ def tab_trend():
     if trend_df is None:
         st.warning("data/exports/quarterly_trend.csv not found. Run: python run_export.py")
         return
+
+    trend_df["quarter"] = trend_df["quarter"].astype(str)
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
