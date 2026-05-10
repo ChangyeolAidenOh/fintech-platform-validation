@@ -2,6 +2,7 @@
 Fintech Platform Validation — Streamlit Dashboard v4
 Customer-centric positioning + Target Users + Platform enhancement framing
 """
+from customer_report_tab import tab_customer_report
 
 import os
 import streamlit as st
@@ -648,13 +649,14 @@ def tab_insights():
 def main():
     render_sidebar()
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "프로젝트 동기",
         "Ablation Study",
         "업종별 리스크",
         "SHAP & Redundancy",
         "시계열 트렌드",
         "시사점",
+        "고객 리포트",
     ])
 
     with tab1:
@@ -669,6 +671,8 @@ def main():
         tab_trend()
     with tab6:
         tab_insights()
+    with tab7:
+        tab_customer_report()
 
 
 if __name__ == "__main__":
