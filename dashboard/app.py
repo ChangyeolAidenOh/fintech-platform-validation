@@ -1,5 +1,5 @@
 """
-Fintech Platform Validation — Streamlit Dashboard v2
+Fintech Platform Validation — Streamlit Dashboard
 """
 
 import os
@@ -12,7 +12,6 @@ from PIL import Image
 
 st.set_page_config(
     page_title="Fintech Platform Validation",
-    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -560,12 +559,12 @@ def main():
     render_sidebar()
 
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "1. 프로젝트 동기",
-        "2. Ablation Study",
-        "3. 업종별 리스크",
-        "4. SHAP & Redundancy",
-        "5. 시계열 트렌드",
-        "6. 시사점",
+        "프로젝트 동기",
+        "Ablation Study",
+        "업종별 리스크",
+        "SHAP & Redundancy",
+        "시계열 트렌드",
+        "시사점",
     ])
 
     with tab1:
