@@ -81,7 +81,7 @@ def render_sidebar():
         "  - Train: 2019Q1 ~ 2024Q3\n"
         "  - Test: 2024Q4 ~ 2025Q3\n"
         "- **Target:** Next-quarter closure rate > threshold\n"
-        "- **검증 실험:** 11개\n"
+        "- **검증 실험:** 15개\n"
         "- **Interpretation:** SHAP + Feature Ablation"
     )
 
@@ -121,7 +121,7 @@ def tab_motivation():
     with k3:
         st.metric("External Lift", "≈ 0", help="ΔAUROC: -0.002 ~ +0.004")
     with k4:
-        st.metric("검증 실험", "11개")
+        st.metric("검증 실험", "15개")
 
     st.markdown("---")
 
@@ -136,7 +136,7 @@ def tab_motivation():
             공공 외부데이터가 실제로 추가적인 예측 가치를 제공하는지** 검증했습니다.
 
             서울시 공공데이터 290만 행을 활용해 상권×업종 단위 폐업 리스크 모델을 구축하고,
-            11개 검증 실험을 통해 외부데이터의 증분효과와 데이터 상품화 방향을 분석했습니다.
+            15개 검증 실험을 통해 외부데이터의 증분효과와 데이터 상품화 방향을 분석했습니다.
             """
         )
 
@@ -568,7 +568,7 @@ def tab_insights():
     findings = [
         (
             "공공 외부데이터의 증분효과는 제한적",
-            "11개 검증 실험에서 일관되게 확인되었으며 역방향 ablation에서는 "
+            "15개 검증 실험에서 일관되게 확인되었으며 역방향 ablation에서는 "
             "외부 데이터 제거 시 오히려 성능이 개선되었습니다. "
             "기존 추정매출 및 점포 변수 대비 추가 정보량이 제한적입니다.",
             "ΔAUROC: -0.002 ~ +0.004"
