@@ -166,10 +166,10 @@ docker compose up -d
 
 # 4. Data collection → ETL → Analysis
 python spike_api_check.py       # API endpoint verification
-python run_collectors.py        # Stage 1: data collection
-python run_sql_etl.py           # Stage 2: raw → staging → mart
-python run_eda.py               # Stage 3: EDA
-python run_model.py             # Stage 4: base ablation
+python run_collectors.py        # Step 1: data collection
+python run_sql_etl.py           # Step 2: raw → staging → mart
+python run_eda.py               # Step 3: EDA
+python run_model.py             # Step 4: base ablation
 
 # 5. Dashboard
 python run_export.py            # Export CSV for dashboard
