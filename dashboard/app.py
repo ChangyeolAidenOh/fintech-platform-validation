@@ -100,12 +100,12 @@ def render_sidebar():
 # Tab 1: Project Motivation — v4: customer-centric framing
 # ================================================================
 def tab_motivation():
-    st.header("1. 금융 빅데이터 플랫폼 고도화 PoC")
+    st.header("금융 빅데이터 플랫폼 고도화를 위한 외부데이터 증분가치 검증")
 
     # v4: Key Question + Finding at top
     st.markdown(
-        "> **Key Question:** 소상공인·금융기관 고객이 상권 리스크를 판단할 때, "
-        "공공 외부데이터는 추정매출·점포 구조 변수 대비 실제로 추가 예측가치를 제공하는가?"
+        "> **Key Question:** 소상공인 및 금융기관 고객이 상권 리스크를 판단할 때, "
+        "공공 외부데이터는 추정매출, 점포 구조 변수 대비 실제로 추가 예측가치를 제공하는가?"
     )
     st.markdown(
         "> **Finding:** 본 공공데이터 환경에서는 증분효과가 제한적이었으며, "
@@ -132,7 +132,7 @@ def tab_motivation():
         st.markdown(
             """
             국내 카드사의 금융 빅데이터 플랫폼을 직접 사용하며,
-            **소상공인·금융기관 고객이 상권 리스크를 판단할 때
+            **소상공인 및 금융기관 고객이 상권 리스크를 판단할 때
             공공 외부데이터가 실제로 추가적인 예측 가치를 제공하는지** 검증했습니다.
 
             서울시 공공데이터 290만 행을 활용해 상권×업종 단위 폐업 리스크 모델을 구축하고,
@@ -168,7 +168,7 @@ def tab_motivation():
         """
         t분기 피처를 사용해 **t+1분기** high-risk 여부를 예측합니다.
         - **Primary target:** 다음 분기 폐업률이 해당 업종 중앙값의 1.5배 초과
-        - **Normalized target:** 다음 분기 폐업률이 같은 업종·분기 평균을 초과
+        - **Normalized target:** 다음 분기 폐업률이 같은 업종, 분기 평균을 초과
 
         모든 피처는 예측 대상 분기 이전 시점의 정보만 사용하며,
         LEAD 윈도우 함수로 시점 분리를 보장합니다.
@@ -177,7 +177,7 @@ def tab_motivation():
 
     st.markdown("---")
 
-    # v4: Target Users section
+    # Target Users section
     st.markdown("#### 플랫폼 고객 유형별 활용 가능성")
 
     tu1, tu2, tu3 = st.columns(3)
@@ -185,19 +185,19 @@ def tab_motivation():
         st.markdown("**금융기관 / 제휴사**")
         st.markdown(
             "소상공인 리스크 조기 식별\n\n"
-            "→ 상권×업종 리스크 스코어와 업종별 차등 모니터링 기준 활용"
+            "상권×업종 리스크 스코어와 업종별 차등 모니터링 기준 활용"
         )
     with tu2:
         st.markdown("**소상공인 / 예비 창업자**")
         st.markdown(
             "입지·업종 선택 시 리스크 판단\n\n"
-            "→ 단순 유동인구가 아니라 점포 회전율·동종업종 밀도 기반 판단"
+            "단순 유동인구가 아니라 점포 회전율 및 동종업종 밀도 기반 판단"
         )
     with tu3:
         st.markdown("**데이터 구매 / 활용 고객**")
         st.markdown(
             "어떤 외부데이터가 가치 있는지 판단\n\n"
-            "→ 공공 외부데이터의 증분효과와 대체재 가능성 구분"
+            "공공 외부데이터의 증분효과와 대체재 가능성 구분"
         )
 
     st.markdown("---")
@@ -215,7 +215,7 @@ def tab_motivation():
 # Tab 2: Ablation Study — unchanged from v3
 # ================================================================
 def tab_ablation():
-    st.header("2. Ablation Study: 외부 데이터 증분효과 검증")
+    st.header("Ablation Study: 외부 데이터 증분효과 검증")
 
     st.markdown("#### 핵심: 추정매출 기반 대비 변화량(ΔAUROC)")
 
@@ -255,7 +255,7 @@ def tab_ablation():
 
     st.caption(
         "개별 외부 데이터의 증분효과는 ΔAUROC ±0.002 이내로, "
-        "기존 추정매출·점포 변수 대비 추가 정보량이 제한적입니다."
+        "기존 추정매출 및 점포 변수 대비 추가 정보량이 제한적입니다."
     )
 
     st.markdown("---")
@@ -292,7 +292,7 @@ def tab_ablation():
     st.markdown("---")
 
     st.markdown("#### Naive Baseline 비교")
-    st.markdown("모델의 실질적 기여를 파악하려면 naive baseline과 비교해야 합니다.")
+    st.markdown("모델의 실질적 기여도를 파악하기 위한 naive baseline과의 비교")
 
     naive_data = pd.DataFrame([
         {"Model": "Naive: 직전 분기 폐업률", "AUROC": 0.6059, "Category": "Naive"},
@@ -311,12 +311,12 @@ def tab_ablation():
 
     st.caption(
         "XGBoost는 최선의 naive baseline(store_count 단독, 0.7445) 대비 "
-        "+0.038 AUROC 개선. P@100 = 0.99~1.00은 주로 store_count의 규모 효과에 기인합니다."
+        "+0.038 AUROC 개선. \n P@100 = 0.99~1.00은 주로 store_count의 규모 효과에 기인합니다."
     )
 
     business_takeaway(
-        "추정매출·점포 데이터가 확보된 환경에서는 공공 외부데이터 추가보다 "
-        "내부 결제 패턴 고도화가 우선순위일 수 있습니다."
+        "추정매출 및 점포 데이터가 확보된 환경에서는 리스크 스코어 개선을 위해 "
+        "공공 외부데이터 확장보다 내부 결제 패턴 심화 분석이 더 효과적일 수 있습니다."
     )
 
 
@@ -324,7 +324,7 @@ def tab_ablation():
 # Tab 3: Industry Risk — v4: 고회전·고변동
 # ================================================================
 def tab_industry():
-    st.header("3. 업종별 리스크 분석")
+    st.header("업종별 리스크 분석")
 
     industry_df = load_csv("industry_summary.csv")
     if industry_df is None:
@@ -354,14 +354,14 @@ def tab_industry():
     with col2:
         st.markdown("#### 업종별 폐업률 차이")
         st.markdown("Kruskal-Wallis H=36,494, **p < 0.001**")
-        st.markdown("업종 간 폐업률 차이는 극도로 유의합니다.")
+        st.markdown("업종 간 폐업률 차이는 통계적으로 매우 유의")
 
         st.markdown("---")
 
         # v4: customer-oriented threshold table
         st.markdown("#### 고객용 업종별 모니터링 기준 제안")
         threshold_df = pd.DataFrame({
-            "업종군": ["고회전·고변동", "중간", "안정"],
+            "업종군": ["고회전|고변동", "중간", "안정"],
             "대표 업종": ["치킨, 편의점, 패스트푸드", "커피, 분식, 중식", "의원, 치과, 가전"],
             "추천 경고 기준": ["업종 평균 대비 1.5배", "업종 평균 대비 1.3배", "절대 폐업 발생 여부"],
         })
@@ -376,8 +376,8 @@ def tab_industry():
     )
 
     business_takeaway(
-        "고객에게 동일 경고 기준이 아니라, 업종별 맥락을 반영한 차등 모니터링 리포트를 제공하면 "
-        "데이터 상품의 실용성이 높아집니다."
+        "고객에게 동일 경고 기준이 아니라, 업종별 맥락을 반영한 차등 모니터링 기준 혹은 리포트를 제공한다면 "
+        "불필요한 경고를 줄이고 실제 위험 신호의 식별 정확도를 높일 수 있습니다."
     )
 
 
@@ -385,7 +385,7 @@ def tab_industry():
 # Tab 4: SHAP & Redundancy — v4: external data role table
 # ================================================================
 def tab_shap():
-    st.header("4. SHAP 분석 & Feature Redundancy")
+    st.header("SHAP 분석 & Feature Redundancy")
 
     st.markdown("#### SHAP 기여도: 원본 vs 정규화 타겟")
 
@@ -452,8 +452,8 @@ def tab_shap():
 
     st.info(
         "**고객 관점 시사점:** 결제 데이터가 없는 상황(신규 가맹점, 현금 위주 점포)에서는 "
-        "외부 공공데이터가 부분적 대체재로 기능할 수 있습니다. "
-        "그러나 결제 데이터가 있는 한, 공공 외부데이터는 이를 보강하지 못합니다."
+        "외부 공공데이터가 약한 보조 신호로 활용될 수 있습니다. 그러나 결제 데이터가 "
+        "확보된 환경에서는 공공 외부데이터의 추가적인 개선 효과가 제한적이었습니다."
     )
 
     st.markdown("---")
@@ -482,8 +482,9 @@ def tab_shap():
             st.image(fit_to_canvas(img), caption="SHAP Summary (정규화, no store_count)", use_container_width=True)
 
     business_takeaway(
-        "고객에게 외부데이터의 역할을 구분해 안내하면 신뢰도가 높아집니다: "
-        "보강재(추정매출과 함께 볼 때) vs 대체재(결제 이력 부족 시)."
+        "고객에게 외부데이터의 역할을 구분해 안내하면 신뢰도가 높아집니다.\n "
+        "결제 데이터가 충분한 경우에는 참고 수준이며, 결제 이력이 부족한 경우에는 초기 리스크 판단을 위한 보조 신호로 활용 가능합니다."
+        "초기 리스크 판단을 위한 보조 신호로 활용 가능합니다."
     )
 
 
@@ -491,12 +492,12 @@ def tab_shap():
 # Tab 5: Temporal Trend — v4: purpose statement
 # ================================================================
 def tab_trend():
-    st.header("5. 시계열 트렌드")
+    st.header("시계열 트렌드")
 
     st.markdown(
-        "이 탭은 데이터 기간 내 구조적 변화를 확인하기 위한 sanity check입니다. "
-        "폐업률과 매출·점포 구조 변화가 함께 움직이는지, "
-        "모델 결과가 특정 분기나 COVID 구간에만 의존하는지 점검합니다."
+        "이 탭은 데이터 기간 내 구조적 변화를 확인하기 위한 검증입니다. "
+        "폐업률과 매출, 점포 구조 변화가 함께 움직이는지, "
+        "모델 결과가 특정 분기나 COVID-19 구간에만 의존하는지 점검합니다."
     )
 
     trend_df = load_csv("quarterly_trend.csv")
@@ -523,6 +524,7 @@ def tab_trend():
         height=500,
         title="분기별 평균 폐업률 추이",
         xaxis_title="분기",
+        xaxis_type="category",
     )
     fig.update_yaxes(title_text="평균 폐업률", secondary_y=False)
     fig.update_yaxes(title_text="관측수", secondary_y=True)
@@ -542,38 +544,43 @@ def tab_trend():
                        mode="lines+markers"),
             secondary_y=True,
         )
-        fig2.update_layout(height=450, title="분기별 매출 vs 유동인구 추이")
+        fig2.update_layout(
+            height=450,
+            title="분기별 매출 vs 유동인구 추이",
+            xaxis_type="category",
+        )
         fig2.update_yaxes(title_text="평균 매출", secondary_y=False)
         fig2.update_yaxes(title_text="평균 유동인구", secondary_y=True)
         st.plotly_chart(fig2, use_container_width=True)
 
     business_takeaway(
-        "2020~2021 COVID-19 기간의 폐업률 급변이 모델 학습에 포함되어 있으며, "
-        "정상 시기 일반화 성능 검증은 향후 과제입니다."
+        "2020~2022 COVID-19 영향 기간의 폐업률 급변이 모델 학습에 포함되어 있으며, "
+        "해당 기간을 분리한 별도 검증으로 일반화 성능을 추가 확인할 수 있습니다."
     )
-
 
 # ================================================================
 # Tab 6: Insights — v4: customer-centric titles
 # ================================================================
 def tab_insights():
-    st.header("6. 분석 결과 및 시사점")
+    st.header("분석 결과 및 시사점")
 
     st.markdown("#### 핵심 발견")
 
     findings = [
         (
             "공공 외부데이터의 증분효과는 제한적",
-            "11개 검증 실험에서 일관되게 확인. 역방향 ablation에서는 "
+            "11개 검증 실험에서 일관되게 확인되었으며 역방향 ablation에서는 "
             "외부 데이터 제거 시 오히려 성능이 개선되었습니다. "
-            "기존 추정매출·점포 변수 대비 추가 정보량이 제한적입니다.",
+            "기존 추정매출 및 점포 변수 대비 추가 정보량이 제한적입니다.",
             "ΔAUROC: -0.002 ~ +0.004"
         ),
         (
             "SHAP 30.5% ≠ AUROC +0.001 (Feature Redundancy)",
             "정규화 타겟에서 외부 데이터의 SHAP 기여도가 30.5%까지 상승하지만, "
             "이는 추정매출 피처와의 중복 신호입니다. "
-            "모델이 '사용'하지만 '새 정보'를 제공하지는 않습니다.",
+            "SHAP 기준으로 모델 예측에 기여하지만, ",
+            "추정매출 변수가 이미 담고 있는 정보와 중복되어 "
+            "실제 판별력 개선으로 이어지지 않습니다.",
             "Redundancy"
         ),
         (
@@ -653,14 +660,14 @@ def tab_insights():
     })
     st.dataframe(priority_df, hide_index=True, use_container_width=True)
 
-    st.caption("공공 환경 데이터보다 법적·비용·수요 변화 신호가 더 높은 우선순위를 가질 수 있습니다.")
+    st.caption("상황에 따라 공공 환경 데이터보다 법적 비용, 수요 변화 신호가 더 높은 우선순위를 가질 수 있습니다.")
 
     st.markdown("---")
     st.markdown("#### 프로젝트 한계")
     st.markdown(
         "- 상권×업종 단위 공공 집계 데이터 (개별 가맹점 단위 아님)\n"
         "- 인허가 정보, 사업자 등록 상태 미확보\n"
-        "- COVID-19 기간 포함 (2019~2025)\n"
+        "- COVID-19 팬데믹 영향 기간 포함 (2010~2022)\n"
         "- 서울 지역 한정\n"
         "- 분기 단위 시간 해상도 (실시간 감지 불가)"
     )
@@ -669,7 +676,7 @@ def tab_insights():
     st.caption(
         "본 프로젝트는 카드사 내부 데이터가 아닌 서울시 공공 상권 데이터를 사용했으며, "
         "개별 가맹점 단위 모델을 대체하기보다 공공 외부데이터의 증분효과를 검증하고 "
-        "대고객 데이터 상품화 방향을 탐색하는 데 목적이 있습니다. "
+        "대고객 데이터 상품화 방향을 탐색하는 데 목적이 있습니다.\n"
         "AUPRC random baseline = test set positive rate (0.228)."
     )
 
