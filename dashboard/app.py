@@ -92,7 +92,7 @@ def render_sidebar():
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(
-        "[GitHub](https://github.com/ChangyeolAidenOh/fintech-platform-validation)"
+        ""
     )
 
 
