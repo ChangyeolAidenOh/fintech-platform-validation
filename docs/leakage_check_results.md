@@ -93,7 +93,7 @@ External public data genuinely adds no incremental value at this resolution.
 | XGB (strict) | XGB Strict: Card+External | 0.7809 | 0.9900 |
 - Figure: figures/model_10_comprehensive.png
 
-### Key Takeaway
+### Summary
 - Best naive baseline: Naive: store_count only (AUROC=0.7445)
 - Best strict XGBoost: AUROC=0.7829
 - XGBoost improvement over best naive: 0.0384

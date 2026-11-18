@@ -1,7 +1,7 @@
 """
 Stage 4 — Normalized Target + AUPRC.
 
-Key insight: store_count alone gives P@100=99%, AUROC=0.74.
+Note: store_count alone gives P@100=99%, AUROC=0.74.
 The model is learning "big areas have more closures" (size effect).
 The real question: "Among similar-sized areas, why does one close more?"
 

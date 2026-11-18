@@ -439,11 +439,11 @@ def comprehensive_chart(naive_results, leakage_results, strict_card, strict_full
     plt.close()
     log(f"- Figure: {path}")
 
-    # Key takeaway
+    # Summary
     naive_best = max(naive_results, key=lambda x: x[1])
     strict_best = max([strict_card["auroc"], strict_full["auroc"]])
 
-    log(f"\n### Key Takeaway")
+    log(f"\n### Summary")
     log(f"- Best naive baseline: {naive_best[0]} (AUROC={naive_best[1]:.4f})")
     log(f"- Best strict XGBoost: AUROC={strict_best:.4f}")
     log(f"- XGBoost improvement over best naive: {strict_best - naive_best[1]:.4f}")
